@@ -12,5 +12,25 @@ var elixir = require('laravel-elixir');
  */
 
 elixir(function(mix) {
-    mix.sass('app.scss');
+    mix.less([
+
+        // assistant {{
+        'helpers.less', 'layouts.less', 'responsive.less',
+        // }}
+
+        // blog {{
+        'blog.less', 'dark.less',
+        // }}
+
+        // extra {{
+        'events.less', 'extras.less', 'pagetitle.less',
+        'portfolio.less', 'shortcodes.less', 'sliders.less',
+        'topbar.less', 'typography.less', 'widgets.less',
+        // }}
+
+        // main {{
+        'header.less', 'content.less', 'footer.less'
+        // }}
+
+    ]);
 });

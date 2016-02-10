@@ -92,3 +92,15 @@ vendor/
 Homestead.yaml
 Homestead.json
 
+/.phpstorm.meta.php
+/_ide_helper.php
+
+## Temp
+/public/css/*
+/public/images/*
+/public/js/*
+!/public/css/bootstrap.css
+!/public/css/dark.css
+!/public/css/responsive.css
+!/public/js/jquery.js
+!/public/js/plugins.js
