@@ -1,7 +1,6 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: Haku
- * Date: 2/15/16
- * Time: 01:08
- */
+@if(count($errors) > 0)
+    <div class="alert alert-danger">
+        <i class="icon-remove-sign"></i>
+        <strong>抱歉！</strong> {{ $errors->first() }}
+    </div>
+@endif

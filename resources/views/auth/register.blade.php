@@ -25,7 +25,13 @@
     @section('container')
         <div class="divcenter col_half nobottommargin">
             <h3>还没有帐号吗？现在开始注册。</h3>
-            {!! Form::open(['id' => 'register-form', 'name' => 'register', 'class' => 'nobottommargin', 'route' => 'register', 'method' => 'POST']) !!}
+            {!! Form::open([
+                'id' => 'register-form',
+                'name' => 'register',
+                'class' => 'nobottommargin',
+                'action' => 'Auth\AuthController@register',
+                'method' => 'POST'
+            ]) !!}
                 <div class="col_half">
                     {!! Form::label('name', '用户名：') !!}
                     {!! Form::text('name', '', ['id' => 'register-form-name', 'class' => 'form-control']) !!}

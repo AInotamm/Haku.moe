@@ -15,12 +15,17 @@
                 <div class="panel panel-default divcenter noradius noborder" style="max-width: 400px;">
                     <div class="panel-body" style="padding: 40px;">
                         {!! Form::open([
-                            'id' => 'login-form', 'class' => 'nobottommargin', 'name' => 'login-form', 'route' => 'login', 'method' => 'post'
+                            'id'     => 'login-form',
+                            'class'  => 'nobottommargin',
+                            'name'   => 'login-form',
+                            'action' => 'Auth\AuthController@login',
+                            'method' => 'post'
                         ]) !!}
                         <h3>登录到网站</h3>
+                        @include('auth.partials.errors')
                         <div class="col_full">
-                            {!! Form::label('username', '用户名') !!}
-                            {!! Form::text('username', '', ['id' => 'login-form-username', 'class' => 'form-control not-dark']) !!}
+                            {!! Form::label('name', '用户名') !!}
+                            {!! Form::text('name', '', ['id' => 'login-form-username', 'class' => 'form-control not-dark']) !!}
                         </div>
                         <div class="col_full">
                             {!! Form::label('password', '密码') !!}
