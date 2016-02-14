@@ -22,9 +22,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'Home\DisplayController@welcome');
 
 /*
 |--------------------------------------------------------------------------
@@ -39,29 +37,7 @@ Route::get('/', function () {
 
 Route::group(['middleware' => ['web']], function () {
 
-    // Register auth-router
+    // Register Login/Register Router
     Route::auth();
-
-    /*
-     * Non-trust User Action
-     * */
-    Route::get('signin', function() { return view('auth.login'); });
-
-    Route::get('signup', function() { return view('auth.register'); });
-
-    /*
-     * Account System
-     * */
-    Route::group(['namespace' => 'Account'], function() {
-        // need auth middleware
-        Route::group(['prefix' => 'accounts'], function() {
-            Route::post('login/attempt', ['as' => 'login', 'uses' => 'UserController@attempt']);
-            Route::post('register/attempt', ['as' => 'register', 'uses' => 'GuestController@attempt']);
-
-            Route::group(['middleware' => 'auth'], function() {
-                Route::get('logout', ['uses' => 'UserController@logout']);
-            });
-        });
-    });
 
 });
