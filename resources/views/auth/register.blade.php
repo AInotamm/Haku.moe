@@ -29,7 +29,7 @@
                 'id' => 'register-form',
                 'name' => 'register',
                 'class' => 'nobottommargin',
-                'action' => 'Auth\AuthController@register',
+                'action' => 'Account\UserController@register',
                 'method' => 'POST'
             ]) !!}
                 <div class="col_half">
@@ -55,10 +55,11 @@
                     {!! Form::password('password', ['id' => 'register-form-password', 'class' => 'form-control']) !!}
                 </div>
                 <div class="col_half col_last">
-                    {!! Form::label('repassword', '确认密码：') !!}
-                    {!! Form::password('password', ['id' => 'register-form-repassword', 'class' => 'form-control']) !!}
+                    {!! Form::label('password_confirmation', '确认密码：') !!}
+                    {!! Form::password('password_confirmation', ['id' => 'register-form-repassword', 'class' => 'form-control']) !!}
                 </div>
                 <div class="clear"></div>
+                @include('auth.partials.errors')
                 <div class="col_full nobottommargin">
                     <button class="button button-3d button-black nomargin" id="register-form-submit" name="submit" value="register">马上注册</button>
                 </div>

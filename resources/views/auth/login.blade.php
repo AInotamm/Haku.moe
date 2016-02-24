@@ -18,8 +18,8 @@
                             'id'     => 'login-form',
                             'class'  => 'nobottommargin',
                             'name'   => 'login-form',
-                            'action' => 'Auth\AuthController@login',
-                            'method' => 'post'
+                            'action' => 'Account\UserController@login',
+                            'method' => 'POST'
                         ]) !!}
                         <h3>登录到网站</h3>
                         @include('auth.partials.errors')
