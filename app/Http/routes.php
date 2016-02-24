@@ -37,7 +37,21 @@ Route::get('/', 'Home\DisplayController@welcome');
 
 Route::group(['middleware' => ['web']], function () {
 
-    // Register Login/Register Router
-    Route::auth();
+    /**
+     *  Register Login/Register Router
+     *  Example: Route::auth();
+     */
+
+    Route::get('login', 'Auth\AuthController@showLoginForm');
+    Route::get('register', 'Auth\AuthController@showRegistrationForm');
+
+    Route::group(['prefix' => 'account'], function () {
+
+        Route::post('in', 'Auth\AuthController@login');
+        Route::post('up', 'Auth\AuthController@register');
+
+        Route::get('out', 'Auth\AuthController@getLogout');
+
+    });
 
 });
