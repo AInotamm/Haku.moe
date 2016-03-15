@@ -160,7 +160,13 @@ return [
          * 3rd Service Providers...
          */
         Collective\Html\HtmlServiceProvider::class,
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        DaveJamesMiller\Breadcrumbs\ServiceProvider::class,
+
+        /*
+         * other Service Providers...
+         */
+        App\Providers\Widgets\OpenChannelServiceProvider::class,
 
     ],
 
@@ -213,7 +219,7 @@ return [
          */
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
-
+        'Breadcrumbs' => DaveJamesMiller\Breadcrumbs\Facade::class,
     ],
 
 ];
