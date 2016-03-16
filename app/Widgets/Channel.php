@@ -7,27 +7,44 @@ use ArrayAccess;
 use Traversable;
 use JsonSerializable;
 use IteratorAggregate;
+use App\Channel as ChannelModel;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
+use App\Contracts\Classifications\Channel\Register as ChannelContract;
 use App\Contracts\Classifications\Channel\Manager as ChannelManagerContract;
 use App\Contracts\Classifications\Channel\Receiver as ChannelReceiverContract;
 
-class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, ChannelReceiverContract, Countable, IteratorAggregate, Jsonable, JsonSerializable
+class Channel implements Arrayable, ArrayAccess, ChannelContract, ChannelManagerContract, ChannelReceiverContract, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {
 
     /**
      * 存储当前频道数据集
      *
-     * @var $channel
+     * @var \Illuminate\Support\Collection $channel
      */
-    private $channel;
+    private $channels;
+
+    /**
+     * 存储数组形式的频道数据
+     *
+     * @var array $data
+     */
+    private $data = [];
+
+    /**
+     * 当前获取的频道的属性
+     *
+     * @var string $type
+     */
+    private $type = '';
 
     /**
      * 存储菜单所有项的数据
      *
-     * @var array $menu
+     * @var array $default
      */
-    public $menu = [];
+    public $default = [];
 
     /**
      * 仅存储关于mega菜单相关的数据项
@@ -43,7 +60,48 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
      */
     public function toArray()
     {
-        // TODO: Implement toArray() method.
+        if ($this->channels instanceof Collection) {
+
+            // 先拿到第一个子级频道项,并拿到它的父级频道ID
+            // 开始遍历整个频道栏目,但是跳过第一条记录
+            // 当然,每当遇到父级频道ID与当前频道ID相同
+            // 则该为根级频道,一次搜索完成
+            $first = $this->channels->first(); $cursor = $first->channel_id;
+
+            $iterator = $this->channels->getIterator();
+
+            while ($iterator->valid() && $channel = $iterator->current()) {
+
+                echo 'prepare' . PHP_EOL;
+
+                if ($channel->channel_id == $cursor || $channel->flag === 1) { $iterator->next(); continue; }
+                echo 'start' . PHP_EOL; var_dump($first->channel_id, $first->channel_parent);
+
+                // 当一次搜索完成时,重新搜索数据集
+                if (isset($_parent) && $_parent->channel_id === $_parent->channel_parent) {
+                    echo 'rewind' . PHP_EOL; $iterator->rewind(); continue;
+                }
+
+                if ($channel->channel_id === $first->channel_parent) {
+
+                    $_parent = $channel; echo 'merge' . PHP_EOL; var_dump($_parent->channel_id);
+
+                    $this->{$_parent->channel_type}[$_parent->channel_name] = array_merge(
+                        $this->{$_parent->channel_type}, ['data' => $first, 'idx' => $cursor, 'to' => $_parent->channel_id]
+                    );
+
+                    echo 'to wind' . PHP_EOL; var_dump($this->{$_parent->channel_type});
+                    // 因为已经设置过子父级关系,则当前数据项设置为1
+                    $cursor = $_parent->channel_id; $first = $_parent; $channel->flag = 1;
+
+                }
+
+                echo 'complete' . PHP_EOL; $iterator->next();
+
+            }
+        }
+
+        return array_merge(['default' => $this->default], ['mega' => $this->mega]);
     }
 
     /**
@@ -55,7 +113,7 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
      */
     public function getIterator()
     {
-        // TODO: Implement getIterator() method.
+        return new \RecursiveArrayIterator($this->data);
     }
 
     /**
@@ -137,17 +195,24 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
      */
     public function toJson($options = 0)
     {
-        // TODO: Implement toJson() method.
+        return json_encode($this->jsonSerialize(), $options);
     }
 
     /**
      * 连接到存放channel数据集的指定数据库,并获取数据集
      *
-     * @return array
+     * @return \App\Widgets\Channel
      */
     public function connection()
     {
-        // TODO: Implement connection() method.
+        /**
+         * 获取频道数据集,按照父级频道ID倒序排列
+         */
+        $this->channels = ChannelModel::all()->sortByDesc(function ($channel) {
+            return $channel['channel_parent'];
+        });
+
+        return $this;
     }
 
     /**
@@ -191,36 +256,35 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
     /**
      * 获取该频道的显示类型
      *
-     * @param mixed  $channel
-     * @param string $property
-     *
+     * @param int|string $identity
      * @return string
      */
-    public function getChannelType($channel, $property = null)
+    public function getChannelType($identity)
     {
-        // TODO: Implement getChannelType() method.
+        // 当标识符为频道名称时
+        return $this->toArray();
     }
 
     /**
      * 获取该频道的父级频道
      *
-     * @param mixed $channel
-     *
-     * @return array
+     * @param string $property
+     * @param string|int $value
+     * @return string
      */
-    public function getChannelParent($channel)
+    public function getChannelParent($property, $value)
     {
-        // TODO: Implement getChannelParent() method.
+
     }
 
     /**
      * 获取该频道的父级频道及其上级频道
      *
-     * @param mixed $channel
-     *
+     * @param string $selfname
+     * @param int $index
      * @return array
      */
-    public function getChannelFamily($channel)
+    public function getChannelFamily($selfname, $index)
     {
         // TODO: Implement getChannelFamily() method.
     }
@@ -228,12 +292,11 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
     /**
      * 获取该频道的元数据,包括了URL和名称
      *
-     * @param mixed  $channel
      * @param string $property
-     *
+     * @param string $except
      * @return array|string
      */
-    public function getChannelMeta($channel, $property = null)
+    public function getChannelMeta($property, $except = '')
     {
         // TODO: Implement getChannelMeta() method.
     }
@@ -241,14 +304,37 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
     /**
      * 列出与该频道相关的父级频道及其上级频道
      *
-     * @param mixed $channel
+     * @param string $selfname
      * @param mixed $breadcrumb
-     *
      * @return array
      */
-    public function listRelativelyChannel($channel, $breadcrumb = null)
+    public function listRelativelyChannel($selfname, $breadcrumb = null)
     {
-        // TODO: Implement listRelativelyChannel() method.
+        // 搜索路径
+        $_path = $selfname . '.';
+
+        foreach ($this->channels as $channel) {
+            // 先找到当前频道所在的数据项,并拿到其父级频道的ID
+            if ($channel->channel_name === $selfname) $_parent = $channel->channel_parent;
+
+            // 如果存在其父级频道ID的值,则开始对比搜索
+            // 拿到当前频道ID,与父级频道对比
+            // 保存当前名字到搜索路径中
+            if (isset($_parent)) {
+                if ($_parent === ($idx = $channel->channel_id)) {
+                    $_path .= $channel->channel_name . '.';
+
+                    // 保存路径之后, 更改父级频道为当前父级频道的父级频道
+                    $_parent = $channel->channel_parent;
+                }
+
+                continue;
+            }
+        }
+
+//        if (!is_null($breadcrumb))
+
+        return [rtrim($_path, '.')];
     }
 
     /**
@@ -274,5 +360,6 @@ class Channel implements Arrayable, ArrayAccess, ChannelManagerContract, Channel
      */
     function jsonSerialize()
     {
-        // TODO: Implement jsonSerialize() method.
-}}
+        return $this->toArray();
+    }
+}
