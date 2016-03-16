@@ -22,7 +22,9 @@
 |
 */
 
-Route::get('/', 'Home\DisplayController@welcome');
+Route::get('/', function () {
+    return view('welcome');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -37,21 +39,29 @@ Route::get('/', 'Home\DisplayController@welcome');
 
 Route::group(['middleware' => ['web']], function () {
 
-    /**
-     *  Register Login/Register Router
-     *  Example: Route::auth();
-     */
+    /* Account System {{ */
 
-    Route::get('login', 'Auth\AuthController@showLoginForm');
-    Route::get('register', 'Auth\AuthController@showRegistrationForm');
+        /**
+         *  Register Login/Register Router
+         *  Example: Route::auth();
+         */
 
-    Route::group(['prefix' => 'account'], function () {
+        Route::get('login', 'Auth\AuthController@showLoginForm');
+        Route::get('register', 'Auth\AuthController@showRegistrationForm');
 
-        Route::post('in', 'Auth\AuthController@login');
-        Route::post('up', 'Auth\AuthController@register');
+        Route::group(['prefix' => 'account'], function () {
 
-        Route::get('out', 'Auth\AuthController@getLogout');
+            Route::post('in', 'Account\UserController@login');
+            Route::post('up', 'Account\UserController@register');
 
-    });
+            Route::get('out', 'Account\UserController@getLogout');
+
+        });
+
+    /* }} */
+
+    /* Blog System {{ */
+        Route::get('blog', 'Home\BlogController@test');
+    /* }} */
 
 });
